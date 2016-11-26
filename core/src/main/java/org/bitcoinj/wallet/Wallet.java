@@ -3338,6 +3338,10 @@ public class Wallet extends BaseTaggableObject
         }
     }
 
+    public String printAllPubKeysAsHex() {
+        return keyChainGroup.printAllPubKeysAsHex();
+    }
+
     @Override
     public String toString() {
         return toString(false, false, null, true, true, null);
