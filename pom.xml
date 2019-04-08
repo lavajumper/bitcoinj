@@ -2,9 +2,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.bitcoinj</groupId>
+  <groupId>com.github.bisq-network.bitcoinj</groupId>
   <artifactId>bitcoinj-parent</artifactId>
-    <version>0.14.4.11</version>
+    <version>cd30ad5b</version>
   <packaging>pom</packaging>
 
   <modules>
@@ -69,8 +69,8 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
+          <source>1.7</source>
+          <target>1.7</target>
           <showDeprecation>true</showDeprecation>
           <showWarnings>true</showWarnings>
         </configuration>

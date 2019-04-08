@@ -71,6 +71,9 @@ public class BitcoinSerializer extends MessageSerializer {
         names.put(RejectMessage.class, "reject");
         names.put(GetUTXOsMessage.class, "getutxos");
         names.put(UTXOsMessage.class, "utxos");
+        names.put(SendHeadersMessage.class, "sendheaders");
+        names.put(SendCmpctMessage.class, "sendcmpct");
+        names.put(FeeFilterMessage.class, "feefilter");
     }
 
     /**
@@ -140,6 +143,7 @@ public class BitcoinSerializer extends MessageSerializer {
         //
         // Bitcoin Core ignores garbage before the magic header bytes. We have to do the same because
         // sometimes it sends us stuff that isn't part of any message.
+
         seekPastMagicBytes(in);
         BitcoinPacketHeader header = new BitcoinPacketHeader(in);
         // Now try to read the whole message.
@@ -175,14 +179,14 @@ public class BitcoinSerializer extends MessageSerializer {
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("Received {} byte '{}' message: {}", header.size, header.command,
+            log.info("Received {} byte '{}' message: {}", header.size, header.command,
                     HEX.encode(payloadBytes));
         }
 
         try {
             return makeMessage(header.command, header.size, payloadBytes, hash, header.checksum);
         } catch (Exception e) {
-            throw new ProtocolException("Error deserializing message " + HEX.encode(payloadBytes) + "\n", e);
+            throw new ProtocolException("Error deserializing message '" + header.command + "' :" + HEX.encode(payloadBytes) + "\n", e);
         }
     }
 
@@ -229,6 +233,12 @@ public class BitcoinSerializer extends MessageSerializer {
             return new UTXOsMessage(params, payloadBytes);
         } else if (command.equals("getutxos")) {
             return new GetUTXOsMessage(params, payloadBytes);
+        } else if (command.equals("sendheaders")) {
+            return new SendHeadersMessage(params, payloadBytes);
+        } else if (command.equals("sendcmpct")) {
+            return new SendCmpctMessage(params, payloadBytes);
+        } else if (command.equals("feefilter")) {
+            return new FeeFilterMessage(params, payloadBytes);
         } else if(params.allowMoreMessages()) {
             return new IgnoreThisMessage(params);
         } else {

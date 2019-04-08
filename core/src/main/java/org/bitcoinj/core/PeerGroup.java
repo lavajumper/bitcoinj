@@ -577,11 +577,14 @@ public class PeerGroup implements TransactionBroadcaster {
             // Don't hold the lock across discovery as this process can be very slow.
             boolean discoverySuccess = false;
             if (doDiscovery) {
+                discoverySuccess = discoverPeers() > 0;
+                /*
                 try {
                     discoverySuccess = discoverPeers() > 0;
                 } catch (PeerDiscoveryException e) {
                     log.error("Peer discovery failure", e);
                 }
+                */
             }
 
             long retryTime;
@@ -613,12 +616,17 @@ public class PeerGroup implements TransactionBroadcaster {
                     do {
                         addrToTry = inactives.poll();
                     } while (ipv6Unreachable && addrToTry.getAddr() instanceof Inet6Address);
+                    if(addrToTry == null){
+                        // We have exhausted the queue of reachable peers, so just settle down.
+                        // Most likely we were given a fixed set of addresses in some test scenario.
+                        return;
+                    }
                     retryTime = backoffMap.get(addrToTry).getRetryTime();
                 }
                 retryTime = Math.max(retryTime, groupBackoff.getRetryTime());
                 if (retryTime > now) {
                     long delay = retryTime - now;
-                    log.info("Waiting {} msec before next connect attempt {}", delay, addrToTry == null ? "" : "to " + addrToTry);
+                    log.info("Waiting {} msec before next connect attempt {}", delay, addrToTry);
 
                     if (!isAlreadyAdded(addrToTry))
                         inactives.add(addrToTry);
@@ -1098,7 +1106,7 @@ public class PeerGroup implements TransactionBroadcaster {
     }
 
     /** Returns number of discovered peers. */
-    protected int discoverPeers() throws PeerDiscoveryException {
+    protected int discoverPeers()  {
         // Don't hold the lock whilst doing peer discovery: it can take a long time and cause high API latency.
         checkState(!lock.isHeldByCurrentThread());
         int maxPeersToDiscoverCount = this.vMaxPeersToDiscoverCount;
