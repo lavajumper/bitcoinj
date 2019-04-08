@@ -794,7 +794,7 @@ public class Transaction extends ChildMessage {
                     s.append(in.getScriptSig());
                     final Coin value = in.getValue();
                     if (value != null)
-                        s.append("  ").append(value.toFriendlyString());
+                        s.append("  ").append(value.toFriendlyString()).append(" (").append(value).append(")");
                     s.append('\n');
                     if (in.hasWitness()) {
                         s.append(indent).append("        witness:");
@@ -835,8 +835,9 @@ public class Transaction extends ChildMessage {
             try {
                 Script scriptPubKey = out.getScriptPubKey();
                 s.append(scriptPubKey.getChunks().size() > 0 ? scriptPubKey.toString() : "<no scriptPubKey>");
+                s.append(" (").append(HEX.encode(scriptPubKey.getProgram())).append(")");
                 s.append("  ");
-                s.append(out.getValue().toFriendlyString());
+                s.append(out.getValue().toFriendlyString()).append(" (").append(out.getValue()).append(")");
                 s.append('\n');
                 ScriptType scriptType = scriptPubKey.getScriptType();
                 if (scriptType != null)
